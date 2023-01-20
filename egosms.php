@@ -71,15 +71,28 @@ function egosms(){
         'EgoSMS',
         'manage_options', //  The capability required for this menu to be displayed to the user.
         'EgoSMS',
-        'egosms_page'
+        'egosms_page',
+       // PLUGIN_URL . '/assets/img/icon.png', 110
     );
 
 }
+
+// importing external css
+function import_scripts_and_styles() {
+    // To enqueue style.css
+    wp_enqueue_style( 'style.css', get_stylesheet_directory_uri() . 'assets/css/style.css', array(), time(), false );
+    // To enqueue custom-script.js
+    wp_enqueue_script( 'custom-js', get_stylesheet_directory_uri() . '/assets/js/custom-script.js', array(), "", true );
+}
+add_action('wp_enqueue_scripts', 'import_scripts_and_styles');
+
+
 add_action( 'admin_menu','egosms' );
 
 function egosms_page(){
     require_once 'pages/admin.php';
 }
+
 
 /**
  * Begins execution of the plugin.
