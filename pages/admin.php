@@ -3,10 +3,10 @@
     <hr>
 
     <div class="tab">
-        <button class="tablinks" onclick="openCity(event, 'settings')" id="defaultOpen">Settings</button>
-        <button class="tablinks" onclick="openCity(event, 'history')">History</button>
-        <button class="tablinks" onclick="openCity(event, 'send')">Send</button>
-        <button class="tablinks" onclick="openCity(event, 'notification')">Notification</button>
+        <button class="tablinks" onclick="openTab(event, 'settings')" id="defaultOpen">Settings</button>
+        <button class="tablinks" onclick="openTab(event, 'history')">History</button>
+        <button class="tablinks" onclick="openTab(event, 'send')">Send</button>
+        <button class="tablinks" onclick="openTab(event, 'notification')">Notification</button>
     </div>
 
     <div id="settings" class="tabcontent">
@@ -97,7 +97,7 @@
 </style>
 
 <script>
-    function openCity(evt, cityName) {
+    function openTab(evt, cityName) {
     var i, tabcontent, tablinks;
     tabcontent = document.getElementsByClassName("tabcontent");
     for (i = 0; i < tabcontent.length; i++) {
