@@ -15,7 +15,7 @@
  * @wordpress-plugin
  * Plugin Name:       EgoSMS
  * Plugin URI:        https://github.com/ABHarop/egosms
- * Description:       The EgoSms integrates the Ego Sms Bulk messaging platform in your wordpress website.
+ * Description:       The EgoSMS Plugin integrates the Ego SMS Bulk messaging platform to your WordPress website.
  * Version:           1.0.0
  * Author:            Arop Boniface
  * Author URI:        https://github.com/ABHarop
