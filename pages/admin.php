@@ -108,18 +108,21 @@
 
 <script>
     // JS for handling tab behaviour
-    function openTab(evt, menuItem) {
-    var i, tabcontent, tablinks;
-    tabcontent = document.getElementsByClassName("tabcontent");
-    for (i = 0; i < tabcontent.length; i++) {
-        tabcontent[i].style.display = "none";
-    }
-    tablinks = document.getElementsByClassName("tablinks");
-    for (i = 0; i < tablinks.length; i++) {
-        tablinks[i].className = tablinks[i].className.replace(" active", "");
-    }
-    document.getElementById(menuItem).style.display = "block";
-    evt.currentTarget.className += " active";
+    function openTab(evt, menuItem)
+    {
+        var i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tabcontent");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+        }
+
+        tablinks = document.getElementsByClassName("tablinks");
+        for (i = 0; i < tablinks.length; i++){
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+
+        document.getElementById(menuItem).style.display = "block";
+        evt.currentTarget.className += " active";
     }
 
     // Get the element with id="defaultOpen" and click on it
@@ -133,7 +136,6 @@
     // Get account user details from table
     $result = $wpdb->get_row ( "SELECT username, password, sender_id FROM $user_table " ); 
 
-
     // Enter egosms user details into the database
     if (isset($_POST['submitaccount']))
     {
@@ -146,8 +148,8 @@
         $password = $user_password;
 
         // Check if user exists
-        if($result->username > 0){
-
+        if($result->username > 0)
+        {
             // update existing user account
             $current_username = $result->username;
             $current_password = $result->password;
@@ -228,9 +230,7 @@
                 </div>
             ";
 
-        }
-        else
-        {
+        }else{
             $message_status = 0;
             $wpdb->query("INSERT INTO $message_table(recipient, message, message_status) VALUES('$recipient', '$message', '$message_status')");
             echo "
@@ -241,3 +241,4 @@
            
         }
     }
+?>
