@@ -3,10 +3,10 @@
     <hr>
 
     <div class="tab">
-        <button class="tablinks" onclick="openTab(event, 'settings')" id="defaultOpen">Settings</button>
-        <button class="tablinks" onclick="openTab(event, 'send')">Send</button>
+        <button class="tablinks" onclick="openTab(event, 'send')" id="defaultOpen">Send Message</button>
+        <button class="tablinks" onclick="openTab(event, 'settings')">Settings</button>
         <button class="tablinks" onclick="openTab(event, 'history')">History</button>
-        <button class="tablinks" onclick="openTab(event, 'notification')">Notification</button>
+        <!-- <button class="tablinks" onclick="openTab(event, 'notification')">Notification</button> -->
     </div>
 
     <div id="settings" class="tabcontent">
@@ -174,10 +174,109 @@
     }
 
   // Sending and saving message
-    if (isset($_POST['sendmessage']))
-    {
-        $recipient = $_POST['recipient'];
-        $message = $_POST['message'];
+    // if (isset($_POST['sendmessage']))
+    // {
+    //     $recipient = $_POST['recipient'];
+    //     $message = $_POST['message'];
+
+    //     // EgoSMS API integration starts here
+    //     function SendSMS($username, $password, $sender, $number, $message)
+    //     {
+
+    //         $url = "www.egosms.co/api/v1/plain/?";
+
+    //         $parameters = "number=[number]&message=[message]&username=[username]&password=[password]&sender=[sender]";
+    //         $parameters = str_replace("[message]", urlencode($message), $parameters);
+    //         $parameters = str_replace("[sender]", urlencode($sender), $parameters);
+    //         $parameters = str_replace("[number]", urlencode($number), $parameters);
+    //         $parameters = str_replace("[username]", urlencode($username), $parameters);
+    //         $parameters = str_replace("[password]", urlencode($password), $parameters);
+    //         $live_url = "https://" . $url . $parameters;
+    //         $parse_url = file($live_url);
+    //         $response = $parse_url[0];
+    //         return $response;
+    //     }
+
+    //     function sanitizeData($value)
+    //     {
+
+    //         $value = htmlspecialchars($value);
+
+    //         $value = htmlentities($value);
+
+    //         $value = stripslashes($value);
+
+    //         $value = strip_tags($value);
+
+    //         return $value;
+
+    //     }
+
+
+    //     $username = $result->username;
+    //     $password = $result->password;
+    //     // will come back later $password = password_verify(Jeepers02??, $result->password);
+    //     $sender = $result->sender_id;
+    //     $number = $_POST['recipient'];
+    //     $message = $_POST['message'];
+
+    //     if(SendSMS($username, $password, $sender, $number, $message) == 'OK')
+    //     {
+    //         $message_status = 1;
+    //         $wpdb->query("INSERT INTO $message_table(recipient, message, message_status) VALUES('$recipient', '$message', '$message_status')");
+    //         echo "
+    //             <div class='success-message'>
+    //                 Message Sent Successfully
+    //             </div>
+    //         ";
+
+    //     }else{
+    //         $message_status = 0;
+    //         $wpdb->query("INSERT INTO $message_table(recipient, message, message_status) VALUES('$recipient', '$message', '$message_status')");
+    //         echo "
+    //             <div class='failure-message'>
+    //                 Message Not Sent
+    //             </div>
+    //         ";
+           
+    //     }
+    // }
+
+    /*============== Woocommerce integration starts from here ====================*/
+    function get_last_order_id(){
+        global $wpdb;
+        $statuses = array_keys(wc_get_order_statuses());
+        $statuses = implode( "','", $statuses );
+    
+        // Getting last Order ID (max value)
+        $results = $wpdb->get_col( "
+            SELECT MAX(ID) FROM {$wpdb->prefix}posts
+            WHERE post_type LIKE 'shop_order'
+            AND post_status IN ('$statuses')
+        " );
+        return reset($results);
+    }
+
+    // Function for sending a message
+    function SendMessage(){
+        // Get an instance of the WC_Order Object from the Order ID (if required)
+        $latest_order_id = get_last_order_id();
+
+        echo $latest_order_id;
+
+        $order = wc_get_order( $latest_order_id );
+        // $order = wc_get_order( 16 );
+         
+        // Get the Order meta data
+        $data  = $order->get_data();
+        $billing_phone      = $data['billing']['phone'];
+
+        $username = $result->username;
+        $password = $result->password;
+        // will come back later $password = password_verify(Jeepers02??, $result->password);
+        $sender = $result->sender_id;
+        $number = $billing_phone;
+        $message = 'Thank you. Your order has been received';
 
         // EgoSMS API integration starts here
         function SendSMS($username, $password, $sender, $number, $message)
@@ -213,17 +312,10 @@
         }
 
 
-        $username = $result->username;
-        $password = $result->password;
-        // will come back later $password = password_verify(Jeepers02??, $result->password);
-        $sender = $result->sender_id;
-        $number = $_POST['recipient'];
-        $message = $_POST['message'];
-
         if(SendSMS($username, $password, $sender, $number, $message) == 'OK')
         {
             $message_status = 1;
-            $wpdb->query("INSERT INTO $message_table(recipient, message, message_status) VALUES('$recipient', '$message', '$message_status')");
+            $wpdb->query("INSERT INTO $message_table(recipient, message, message_status) VALUES('$number', '$message', '$message_status')");
             echo "
                 <div class='success-message'>
                     Message Sent Successfully
@@ -232,13 +324,15 @@
 
         }else{
             $message_status = 0;
-            $wpdb->query("INSERT INTO $message_table(recipient, message, message_status) VALUES('$recipient', '$message', '$message_status')");
+            $wpdb->query("INSERT INTO $message_table(recipient, message, message_status) VALUES('$number', '$message', '$message_status')");
             echo "
                 <div class='failure-message'>
                     Message Not Sent
                 </div>
             ";
-           
+            
         }
     }
+
+ SendMessage();
 ?>

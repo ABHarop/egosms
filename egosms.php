@@ -86,13 +86,11 @@ function import_scripts_and_styles() {
 }
 add_action('wp_enqueue_scripts', 'import_scripts_and_styles');
 
-
 add_action( 'admin_menu','egosms' );
 
 function egosms_page(){
     require_once 'pages/admin.php';
 }
-
 
 /**
  * Begins execution of the plugin.
