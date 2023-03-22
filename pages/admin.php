@@ -254,7 +254,7 @@
             WHERE post_type LIKE 'shop_order'
             AND post_status IN ('$statuses')
         " );
-        return reset($results);
+       // return reset($results);
     }
 
     // Function for sending a message
@@ -268,8 +268,8 @@
         // $order = wc_get_order( 16 );
          
         // Get the Order meta data
-        $data  = $order->get_data();
-        $billing_phone      = $data['billing']['phone'];
+        $order_data  = $order->get_data();
+        $billing_phone = $order_data['billing']['phone'];
 
         $username = $result->username;
         $password = $result->password;
