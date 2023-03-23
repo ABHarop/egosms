@@ -80,7 +80,7 @@ function egosms(){
 // importing external css
 function import_scripts_and_styles() {
     // To enqueue style.css
-    wp_enqueue_style( 'style.css', get_stylesheet_directory_uri() . 'assets/css/style.css', array(), time(), false );
+    wp_enqueue_style( 'style.css', get_stylesheet_directory_uri() . '/assets/css/style.css', array(), time(), false );
     // To enqueue custom-script.js
     wp_enqueue_script( 'custom-js', get_stylesheet_directory_uri() . '/assets/js/custom-script.js', array(), "", true );
 }
