@@ -15,7 +15,7 @@
  * @wordpress-plugin
  * Plugin Name:       EgoSMS
  * Plugin URI:        https://github.com/ABHarop/egosms
- * Description:       The EgoSMS Plugin integrates the Ego SMS Bulk messaging platform to your WordPress website.
+ * Description:       The EgoSMS Plugin integrates the EgoSMS Bulk messaging platform to your WordPress website.
  * Version:           1.0.0
  * Author:            Arop Boniface
  * Author URI:        https://github.com/ABHarop
@@ -78,19 +78,68 @@ function egosms(){
 }
 
 // importing external css
-function import_scripts_and_styles() {
-    // To enqueue style.css
-    wp_enqueue_style( 'style.css', get_stylesheet_directory_uri() . '/assets/css/style.css', array(), time(), false );
-    // To enqueue custom-script.js
-    wp_enqueue_script( 'custom-js', get_stylesheet_directory_uri() . '/assets/js/custom-script.js', array(), "", true );
-}
-add_action('wp_enqueue_scripts', 'import_scripts_and_styles');
+// function import_scripts_and_styles() {
+//     // To enqueue style.css
+//     //wp_enqueue_style( 'style.css', get_stylesheet_directory_uri() . 'assets/css/style.css', array(), time(), false );
+//    // wp_register_style( 'style.css', get_stylesheet_directory_uri() . '../assets/css/style.css');
+//    // wp_enqueue_style( 'style.css');
+//     // To enqueue custom-script.js
+//   //  wp_enqueue_script( 'custom-js', get_stylesheet_directory_uri() . '/assets/js/custom-script.js', array(), "", true );
+
+//   wp_enqueue_style('style', plugin_dir_url(__FILE__) .'../assets/css/style.css');
+// }
+
+// add_action('wp_enqueue_scripts', 'import_scripts_and_styles');
 
 add_action( 'admin_menu','egosms' );
+
+function send_message() {
+
+    // Get the id of the last order received
+    function get_last_order_id(){
+        global $wpdb;
+        $statuses = array_keys(wc_get_order_statuses());
+        $statuses = implode( "','", $statuses );
+
+        // Getting last Order ID (max value)
+        $last_order = $wpdb->get_col( "
+            SELECT MAX(ID) FROM {$wpdb->prefix}posts
+            WHERE post_type LIKE 'shop_order'
+            AND post_status IN ('$statuses')
+        " );
+        return reset($last_order);
+    }
+
+
+    $order = wc_get_order(get_last_order_id());
+    $order_id = get_last_order_id();
+
+    $order_data  = $order->get_data();
+
+    // Required parameters for EgoSMS
+    $number = $order_data['billing']['phone'];
+    $message = 'Your order No. '.$order_id.' has been received. Thank you';
+
+    require_once plugin_dir_path( __FILE__ ) . 'includes/API.php';
+ 
+    if(SendSMS($username, $password, $sender, $number, $message) == 'OK')
+    {
+        $message_status = 1;
+        $wpdb->query("INSERT INTO $message_table(recipient, message, message_status) VALUES('$number', '$message', '$message_status')");
+    }else{
+        $message_status = 0;
+        $wpdb->query("INSERT INTO $message_table(recipient, message, message_status) VALUES('$number', '$message', '$message_status')");
+    
+    }
+ 
+ }
+
+add_action( 'woocommerce_new_order', 'send_message' );
 
 function egosms_page(){
     require_once 'pages/admin.php';
 }
+
 
 /**
  * Begins execution of the plugin.

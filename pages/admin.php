@@ -1,12 +1,12 @@
 <div class="wrap form-container">
-    <h1>EGOSMS MESSAGING PLUGIN</h1>
+    <h1 class="form-header">EGOSMS MESSAGING PLUGIN</h1>
     <hr>
 
     <div class="tab">
-        <button class="tablinks" onclick="openTab(event, 'send')" id="defaultOpen">Send Message</button>
+        <button class="tablinks" onclick="openTab(event, 'send')" id="defaultOpen">Message</button>
+        <button class="tablinks" onclick="openTab(event, 'balance')">Balance</button>
         <button class="tablinks" onclick="openTab(event, 'settings')">Settings</button>
         <button class="tablinks" onclick="openTab(event, 'history')">History</button>
-        <!-- <button class="tablinks" onclick="openTab(event, 'notification')">Notification</button> -->
     </div>
 
     <div id="settings" class="tabcontent">
@@ -42,6 +42,11 @@
         </form><br>
     </div>
 
+    <div id="balance" class="tabcontent">
+        <h3>EgoSMS Account Balance</h3>
+
+    </div>
+
     <div id="send" class="tabcontent">
         <h3>Enter Message to Send</h3>
         <form method="post" action="" >
@@ -59,7 +64,7 @@
                     <td>
                         <textarea size="50" type="text" name="message" placeholder="Enter Your Message" class="regular-text" required></textarea>
                         <br />
-                        <small>Maximum Characters 160</small>
+                        <small>Standard Character Limit</small>
                     </td>
                 </tr>
             </table><br>
@@ -72,16 +77,16 @@
         <table class="wp-list-table widefat striped">
             <thead>
             <tr>
-                <th width="25%">Recipient</th>
+                <th width="25%" class="table-head">Recipient</th>
                 <th width="25%">Message</th>
-                <th width="25%">Status</th>
+                <th width="25%" style="font-weight: 500">Status</th>
             </tr>
             </thead>
             <tbody>
                 <?php
                     global $wpdb;
                     $message_table = $wpdb->prefix . "egosms_messages";
-                    $result = $wpdb->get_results("SELECT * FROM $message_table");
+                    $result = $wpdb->get_results("SELECT * FROM $message_table ORDER BY id DESC");
                     
                     foreach ($result as $print) {
                         echo "
@@ -95,10 +100,6 @@
                 ?>
             </tbody>
         </table>
-    </div>
-
-    <div id="notification" class="tabcontent">
-        <h3>Notification</h3>
     </div>
 </div>
 
@@ -143,8 +144,6 @@
         $user_password = $_POST['password'];
         $user_sender_id = $_POST['sender_id'];
 
-        // Will come back later  $password = password_hash($user_password, PASSWORD_DEFAULT);
-
         $password = $user_password;
 
         // Check if user exists
@@ -178,54 +177,16 @@
     /*============== Sending message to recipient ====================*/
     if (isset($_POST['sendmessage']))
     {
-        $recipient = $_POST['recipient'];
-        $message = $_POST['message'];
-
-        // EgoSMS API integration starts here
-        function SendSMS($username, $password, $sender, $number, $message)
-        {
-
-            $url = "www.egosms.co/api/v1/plain/?";
-
-            $parameters = "number=[number]&message=[message]&username=[username]&password=[password]&sender=[sender]";
-            $parameters = str_replace("[message]", urlencode($message), $parameters);
-            $parameters = str_replace("[sender]", urlencode($sender), $parameters);
-            $parameters = str_replace("[number]", urlencode($number), $parameters);
-            $parameters = str_replace("[username]", urlencode($username), $parameters);
-            $parameters = str_replace("[password]", urlencode($password), $parameters);
-            $live_url = "https://" . $url . $parameters;
-            $parse_url = file($live_url);
-            $response = $parse_url[0];
-            return $response;
-        }
-
-        function sanitizeData($value)
-        {
-
-            $value = htmlspecialchars($value);
-
-            $value = htmlentities($value);
-
-            $value = stripslashes($value);
-
-            $value = strip_tags($value);
-
-            return $value;
-
-        }
-
-
-        $username = $result->username;
-        $password = $result->password;
-        // will come back later $password = password_verify(Jeepers02??, $result->password);
-        $sender = $result->sender_id;
+        // Required parameters for EgoSMS
         $number = $_POST['recipient'];
         $message = $_POST['message'];
+
+        require_once plugin_dir_path( __FILE__ ) . '../includes/API.php';
 
         if(SendSMS($username, $password, $sender, $number, $message) == 'OK')
         {
             $message_status = 1;
-            $wpdb->query("INSERT INTO $message_table(recipient, message, message_status) VALUES('$recipient', '$message', '$message_status')");
+            $wpdb->query("INSERT INTO $message_table(recipient, message, message_status) VALUES('$number', '$message', '$message_status')");
             echo "
                 <div class='success-message'>
                     Message Sent Successfully
@@ -245,134 +206,7 @@
     }
     /*============== End Sending message to recipient ====================*/
 
-    /*============== Start Woocommerce integration ====================*/
-    function get_last_order_id(){
-        global $wpdb;
-        $statuses = array_keys(wc_get_order_statuses());
-        $statuses = implode( "','", $statuses );
-    
-        // Getting last Order ID (max value)
-        $last_order = $wpdb->get_col( "
-            SELECT MAX(ID) FROM {$wpdb->prefix}posts
-            WHERE post_type LIKE 'shop_order'
-            AND post_status IN ('$statuses')
-        " );
-        return reset($last_order);
-    }
+    // importing styles.css
+    wp_enqueue_style('style', plugin_dir_url(__FILE__) .'../assets/css/style.css');
 
-    function get_secon_order_id(){
-        global $wpdb;
-        $statuses = array_keys(wc_get_order_statuses());
-        $statuses = implode( "','", $statuses );
-    
-        // Getting last Order ID (max value)
-        $last_order = $wpdb->get_col( "
-            SELECT MAX(ID) FROM {$wpdb->prefix}posts
-            WHERE post_type LIKE 'shop_order'
-            AND post_status IN ('$statuses')
-        " );
-        return reset();
-    }
-
-    echo get_last_order_id();
-    echo "/";
-    echo get_secon_order_id();
-    
-    // Function for sending a message
-    $last_order = get_last_order_id();
-    //echo $last_order;
-    $num_order = $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}posts WHERE post_type LIKE 'shop_order'" ); 
-    // echo $result;
-    echo "<p>Number of order: {$num_order}</p>";
-
-    if($num_order -= 1){
-        echo 'New order';
-        echo "<p>Number of order: {$num_order}</p>";
-    }else{
-        echo 'No Order';
-        echo "<p>Number of order: {$num_order}</p>";
-    }
-    function SendMessage(){
-        // global $wpdb;
-        // global $user_table;
-        // $message_table = $wpdb->prefix . "egosms_messages";
-        // $result = $wpdb->get_row ( "SELECT username, password, sender_id FROM $user_table " ); 
-
-        // // Get the last order
-        // $order = wc_get_order(get_last_order_id());
-        // // Get the Order meta data
-        // $order_data  = $order->get_data();
-        // $number = $order_data['billing']['phone'];
-
-        // $username = $result->username;
-        // $password = $result->password;
-
-        // echo $username;
-        // echo $password;
-        // echo $number;
-        
-        // // will come back later $password = password_verify(Jeepers02??, $result->password);
-        // $sender = $result->sender_id;
-        // $number = $billing_phone;
-        // $message = 'Thank you. Your order has been received';
-
-        // // EgoSMS API integration starts here
-        // function SendSMS($username, $password, $sender, $number, $message)
-        // {
-
-        //     $url = "www.egosms.co/api/v1/plain/?";
-
-        //     $parameters = "number=[number]&message=[message]&username=[username]&password=[password]&sender=[sender]";
-        //     $parameters = str_replace("[message]", urlencode($message), $parameters);
-        //     $parameters = str_replace("[sender]", urlencode($sender), $parameters);
-        //     $parameters = str_replace("[number]", urlencode($number), $parameters);
-        //     $parameters = str_replace("[username]", urlencode($username), $parameters);
-        //     $parameters = str_replace("[password]", urlencode($password), $parameters);
-        //     $live_url = "https://" . $url . $parameters;
-        //     $parse_url = file($live_url);
-        //     $response = $parse_url[0];
-        //     return $response;
-        // }
-
-        // function sanitizeData($value)
-        // {
-
-        //     $value = htmlspecialchars($value);
-
-        //     $value = htmlentities($value);
-
-        //     $value = stripslashes($value);
-
-        //     $value = strip_tags($value);
-
-        //     return $value;
-
-        // }
-
-
-        // if(SendSMS($username, $password, $sender, $number, $message) == 'OK')
-        // {
-        //     $message_status = 1;
-        //     $wpdb->query("INSERT INTO $message_table(recipient, message, message_status) VALUES('$number', '$message', '$message_status')");
-        //     echo "
-        //         <div class='success-message'>
-        //             Message Sent Successfully
-        //         </div>
-        //     ";
-
-        // }else{
-        //     $message_status = 0;
-        //     $wpdb->query("INSERT INTO $message_table(recipient, message, message_status) VALUES('$number', '$message', '$message_status')");
-        //     echo "
-        //         <div class='failure-message'>
-        //             Message Not Sent
-        //         </div>
-        //     ";
-            
-        // }
-    }
-
-    /*============== End Woocommerce integration ====================*/
-
- SendMessage();
 ?>
