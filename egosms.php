@@ -36,6 +36,9 @@ if ( ! defined( 'WPINC' ) ) {
  * Rename this for your plugin and update it as you release new versions.
  */
 define( 'EGOSMS_VERSION', '1.0.0' );
+define('PLUGIN_PATH',plugin_dir_path(__FILE__));
+define('PLUGIN_URL',plugin_dir_url(__FILE__));
+define('PLUGIN',plugin_basename(__FILE__));
 
 /**
  * The code that runs during plugin activation.
@@ -72,16 +75,15 @@ function egosms(){
         'manage_options', //  The capability required for this menu to be displayed to the user.
         'EgoSMS',
         'egosms_page',
-       // PLUGIN_URL . '/assets/img/icon.png', 110
+        PLUGIN_URL . '/assets/img/icon.png', 110,
     );
-
 }
 
 // importing external css
 // function import_scripts_and_styles() {
 //     // To enqueue style.css
 //     //wp_enqueue_style( 'style.css', get_stylesheet_directory_uri() . 'assets/css/style.css', array(), time(), false );
-//    // wp_register_style( 'style.css', get_stylesheet_directory_uri() . '../assets/css/style.css');
+//    wp_register_style( 'style.css', get_stylesheet_directory_uri() . 'assets/css/style.css');
 //    // wp_enqueue_style( 'style.css');
 //     // To enqueue custom-script.js
 //   //  wp_enqueue_script( 'custom-js', get_stylesheet_directory_uri() . '/assets/js/custom-script.js', array(), "", true );
@@ -95,28 +97,35 @@ add_action( 'admin_menu','egosms' );
 
 function send_message() {
 
+    global $wpdb;
+    $user_table = $wpdb->prefix . "egosms_user";
+    $message_table = $wpdb->prefix . "egosms_messages";
+
     // Get the id of the last order received
     function get_last_order_id(){
         global $wpdb;
         $statuses = array_keys(wc_get_order_statuses());
         $statuses = implode( "','", $statuses );
 
-        // Getting last Order ID (max value)
         $last_order = $wpdb->get_col( "
-            SELECT MAX(ID) FROM {$wpdb->prefix}posts
-            WHERE post_type LIKE 'shop_order'
-            AND post_status IN ('$statuses')
+        SELECT MAX(ID) FROM {$wpdb->prefix}posts
+        WHERE post_type LIKE 'shop_order'
+        AND post_status IN ('$statuses')
         " );
         return reset($last_order);
-    }
 
+    }
 
     $order = wc_get_order(get_last_order_id());
     $order_id = get_last_order_id();
 
     $order_data  = $order->get_data();
 
+    $result = $wpdb->get_row ( "SELECT username, password, sender_id FROM $user_table " ); 
     // Required parameters for EgoSMS
+    $username = $result->username;
+    $password = $result->password;
+    $sender = $result->sender_id;
     $number = $order_data['billing']['phone'];
     $message = 'Your order No. '.$order_id.' has been received. Thank you';
 
@@ -134,7 +143,7 @@ function send_message() {
  
  }
 
-add_action( 'woocommerce_new_order', 'send_message' );
+add_action( 'woocommerce_new_order', 'send_message', 1, 1 );
 
 function egosms_page(){
     require_once 'pages/admin.php';

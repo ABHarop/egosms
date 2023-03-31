@@ -4,7 +4,7 @@
 
     <div class="tab">
         <button class="tablinks" onclick="openTab(event, 'send')" id="defaultOpen">Message</button>
-        <button class="tablinks" onclick="openTab(event, 'balance')">Balance</button>
+        <!-- <button class="tablinks" onclick="openTab(event, 'balance')">Balance</button> -->
         <button class="tablinks" onclick="openTab(event, 'settings')">Settings</button>
         <button class="tablinks" onclick="openTab(event, 'history')">History</button>
     </div>
@@ -24,7 +24,7 @@
                 <tr valign="top">
                     <th scope="row">Password<br /><span style="font-size: x-small;">Your egosms account password</span></th>
                     <td>
-                        <input size="50" type="text" name="password" placeholder="Enter Account Password" class="regular-text" required/>
+                        <input size="50" type="password" name="password" placeholder="Enter Account Password" class="regular-text" required/>
                         <br />
                         <small>To create an account, visit <a href="https://www.egosms.co/" target="_blank">https://www.egosms.co/</a></small>
                     </td>
@@ -72,13 +72,13 @@
         </form><br>
     </div>
 
-    <div id="history" class="tabcontent">
+    <div class="tabcontent" id='history'>
         <h2>Sent Messages</h2>
         <table class="wp-list-table widefat striped">
             <thead>
             <tr>
-                <th width="25%" class="table-head">Recipient</th>
-                <th width="25%">Message</th>
+                <th width="25%" style="font-weight: 500">Recipient</th>
+                <th width="25%" style="font-weight: 500">Message</th>
                 <th width="25%" style="font-weight: 500">Status</th>
             </tr>
             </thead>
@@ -87,13 +87,13 @@
                     global $wpdb;
                     $message_table = $wpdb->prefix . "egosms_messages";
                     $result = $wpdb->get_results("SELECT * FROM $message_table ORDER BY id DESC");
-                    
                     foreach ($result as $print) {
+                        $status = $print->message_status == 1 ? 'Sent' : 'Failed';
                         echo "
                         <tr>
                             <td width='25%'>$print->recipient</td>
                             <td width='25%'>$print->message</td>
-                            <td width='25%'>$print->message_status</td>
+                            <td width='25%'>$status</td>
                         </tr>
                         ";
                     }
@@ -102,10 +102,6 @@
         </table>
     </div>
 </div>
-
-<style>
-
-</style>
 
 <script>
     // JS for handling tab behaviour
@@ -125,6 +121,11 @@
         document.getElementById(menuItem).style.display = "block";
         evt.currentTarget.className += " active";
     }
+
+    // js for refreshing table
+    setInterval(function() {
+        $('#history').load(location.href + ' #history');
+    }, 3000);
 
     // Get the element with id="defaultOpen" and click on it
     document.getElementById("defaultOpen").click();
@@ -146,8 +147,8 @@
 
         $password = $user_password;
 
-        // Check if user exists
-        if($result->username > 0)
+        // Check if result is true
+        if($result)
         {
             // update existing user account
             $current_username = $result->username;
@@ -177,32 +178,50 @@
     /*============== Sending message to recipient ====================*/
     if (isset($_POST['sendmessage']))
     {
+        global $wpdb;
+        $user_table = $wpdb->prefix . "egosms_user";
+        $message_table = $wpdb->prefix . "egosms_messages";
         // Required parameters for EgoSMS
         $number = $_POST['recipient'];
         $message = $_POST['message'];
+    
+        $result = $wpdb->get_row ( "SELECT username, password, sender_id FROM $user_table " ); 
 
-        require_once plugin_dir_path( __FILE__ ) . '../includes/API.php';
-
-        if(SendSMS($username, $password, $sender, $number, $message) == 'OK')
-        {
-            $message_status = 1;
-            $wpdb->query("INSERT INTO $message_table(recipient, message, message_status) VALUES('$number', '$message', '$message_status')");
-            echo "
-                <div class='success-message'>
-                    Message Sent Successfully
-                </div>
-            ";
-
+        if($result){
+            $username = $result->username;
+            $password = $result->password;
+            $sender = $result->sender_id;
+    
+            require_once plugin_dir_path( __FILE__ ) . '../includes/API.php';
+    
+            if(SendSMS($username, $password, $sender, $number, $message) == 'OK')
+            {
+                $message_status = 1;
+                $wpdb->query("INSERT INTO $message_table(recipient, message, message_status) VALUES('$number', '$message', '$message_status')");
+                echo "
+                    <div class='success-message'>
+                        Message Sent Successfully
+                    </div>
+                ";
+    
+            }else{
+                $message_status = 0;
+                $wpdb->query("INSERT INTO $message_table(recipient, message, message_status) VALUES('$recipient', '$message', '$message_status')");
+                echo "
+                    <div class='failure-message'>
+                        Message Not Sent
+                    </div>
+                ";
+               
+            }
         }else{
-            $message_status = 0;
-            $wpdb->query("INSERT INTO $message_table(recipient, message, message_status) VALUES('$recipient', '$message', '$message_status')");
             echo "
                 <div class='failure-message'>
-                    Message Not Sent
+                    Setup EgoSMS Account First.
                 </div>
             ";
-           
         }
+        
     }
     /*============== End Sending message to recipient ====================*/
 

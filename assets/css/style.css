@@ -61,3 +61,16 @@
     font-size: 14px;
     font-weight: 500;
 }
+
+
+/* Style for status messages */
+
+.success-message {
+    font-size: 15px;
+    color: green;
+}
+
+.failure-message {
+    font-size: 15px;
+    color: red;
+}
