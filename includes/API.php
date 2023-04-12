@@ -1,16 +1,5 @@
 <?php
 
-    global $wpdb;
-    $user_table = $wpdb->prefix . "egosms_user";
-    $message_table = $wpdb->prefix . "egosms_messages";
-
-    $result = $wpdb->get_row ( "SELECT username, password, sender_id FROM $user_table " ); 
-    
-    $username = $result->username;
-    $password = $result->password;
-    $sender = $result->sender_id;
-
-
     // EgoSMS API integration starts here
     function SendSMS($username, $password, $sender, $number, $message)
     {
