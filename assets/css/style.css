@@ -11,7 +11,7 @@
     overflow: hidden;
     border: 1px solid #ccc;
     background-color: #f1f1f1;
-    font-size: 17px;
+    /* font-size: 17px; */
 }
 
 
@@ -35,7 +35,7 @@
 .tab button:hover {
     background-color: #c9e4a4;
     color: #2955a3;
-    font-weight: 400;
+    font-weight: 500;
 }
 
 
@@ -44,7 +44,7 @@
 .tab button.active {
     background-color: #2955a3;
     color: #fff;
-    font-weight: 400;
+    font-weight: 500;
 }
 
 

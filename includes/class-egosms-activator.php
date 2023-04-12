@@ -42,7 +42,8 @@ class Egosms_Activator {
 				id mediumint unsigned not null primary key auto_increment,
 				username varchar(20),
 				password varchar(150),
-				sender_id varchar(50)
+				sender_id varchar(50),
+				message varchar(150)
 			)";
 
 			require_once(ABSPATH . 'wp-admin/includes/upgrade.php');

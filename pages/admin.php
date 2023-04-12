@@ -34,7 +34,15 @@
                     <td>
                         <input size="50" type="text" name="sender_id" placeholder="Enter Sender ID" class="regular-text" required/>
                         <br />
-                        <small>This is your senderID</small>
+                        <small>This is your sender ID</small>
+                    </td>
+                </tr>
+                    <tr valign="top">
+                    <th scope="row">Message<br /><span style="font-size: x-small;">Enter Custom Message.</span></th>
+                    <td>
+                        <textarea size="50" type="text" name="message" placeholder="Enter Message" class="regular-text" style="resize:none" required></textarea>
+                        <br />
+                        <small>Message will be added to order No.</small>
                     </td>
                 </tr>
             </table><br>
@@ -62,7 +70,7 @@
                 <tr valign="top">
                     <th scope="row">Type Message<br /><span style="font-size: x-small;">Type Your Message</span></th>
                     <td>
-                        <textarea size="50" type="text" name="message" placeholder="Enter Your Message" class="regular-text" required></textarea>
+                        <textarea size="50" type="text" name="message" placeholder="Enter Your Message" class="regular-text" style="resize:none" required></textarea>
                         <br />
                         <small>Standard Character Limit</small>
                     </td>
@@ -82,7 +90,7 @@
                 <th width="25%" style="font-weight: 500">Status</th>
             </tr>
             </thead>
-            <tbody>
+            <tbody id="refreshDivContent">
                 <?php
                     global $wpdb;
                     $message_table = $wpdb->prefix . "egosms_messages";
@@ -104,6 +112,10 @@
 </div>
 
 <script>
+    // js for refreshing table
+    setInterval(function() {
+        $('#refreshDivContent').load(location.href + ' #refreshDivContent');
+    }, 3000);
     // JS for handling tab behaviour
     function openTab(evt, menuItem)
     {
@@ -122,13 +134,10 @@
         evt.currentTarget.className += " active";
     }
 
-    // js for refreshing table
-    setInterval(function() {
-        $('#history').load(location.href + ' #history');
-    }, 3000);
-
+    
     // Get the element with id="defaultOpen" and click on it
     document.getElementById("defaultOpen").click();
+
 </script>
 
 <?php
@@ -136,7 +145,7 @@
     $user_table = $wpdb->prefix . "egosms_user";
     $message_table = $wpdb->prefix . "egosms_messages";
     // Get account user details from table
-    $result = $wpdb->get_row ( "SELECT id, username, password, sender_id FROM $user_table " ); 
+    $result = $wpdb->get_row ( "SELECT id, username, password, sender_id, message FROM $user_table " ); 
 
     /*============== Enter egosms user details into the database ====================*/
     if (isset($_POST['submitaccount']))
@@ -144,6 +153,7 @@
         $user_username = $_POST['username'];
         $user_password = $_POST['password'];
         $user_sender_id = $_POST['sender_id'];
+        $user_message = $_POST['message'];
 
         $password = $user_password;
 
@@ -154,16 +164,17 @@
             $current_username = $result->username;
             $current_password = $result->password;
             $current_sender_id = $result->sender_id;
+            $current_message = $result->message;
      
             $wpdb->query( $wpdb->prepare("UPDATE $user_table
-                SET username = %s, password = %s, sender_id = %s 
-                WHERE username = %s AND password = %s AND sender_id = %s ",
-                $user_username, $password, $user_sender_id, $current_username, $current_password, $current_sender_id)
-            );
+            SET username = %s, password = %s, sender_id = %s, message = %s 
+            WHERE username = %s AND password = %s AND sender_id = %s AND message = %s  ",
+            $user_username, $password, $user_sender_id, $user_message, $current_username, $current_password, $current_sender_id, $current_message )
+        );
 
         }else{
             // insert user account details into the table
-            $wpdb->query("INSERT INTO $user_table(username, password, sender_id) VALUES('$user_username', '$user_password', '$user_sender_id')");
+            $wpdb->query("INSERT INTO $user_table(username, password, sender_id, message) VALUES('$user_username', '$user_password', '$user_sender_id', '$user_message')");
         };
 
         echo "
@@ -206,7 +217,7 @@
     
             }else{
                 $message_status = 0;
-                $wpdb->query("INSERT INTO $message_table(recipient, message, message_status) VALUES('$recipient', '$message', '$message_status')");
+                $wpdb->query("INSERT INTO $message_table(recipient, message, message_status) VALUES('$number', '$message', '$message_status')");
                 echo "
                     <div class='failure-message'>
                         Message Not Sent

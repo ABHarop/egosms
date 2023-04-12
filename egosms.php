@@ -81,17 +81,17 @@ function egosms(){
 
 // importing external css
 // function import_scripts_and_styles() {
-//     // To enqueue style.css
-//     //wp_enqueue_style( 'style.css', get_stylesheet_directory_uri() . 'assets/css/style.css', array(), time(), false );
-//    wp_register_style( 'style.css', get_stylesheet_directory_uri() . 'assets/css/style.css');
-//    // wp_enqueue_style( 'style.css');
-//     // To enqueue custom-script.js
-//   //  wp_enqueue_script( 'custom-js', get_stylesheet_directory_uri() . '/assets/js/custom-script.js', array(), "", true );
+    // To enqueue style.css
+    //wp_enqueue_style( 'style.css', get_stylesheet_directory_uri() . 'assets/css/style.css', array(), time(), false );
+   // wp_register_style( 'style.css', get_stylesheet_directory_uri() . 'assets/css/style.css');
+   // wp_enqueue_style( 'style.css');
+    // To enqueue custom-script.js
+  //  wp_enqueue_script( 'custom-js', get_stylesheet_directory_uri() . '/assets/js/custom-script.js', array(), "", true );
 
-//   wp_enqueue_style('style', plugin_dir_url(__FILE__) .'../assets/css/style.css');
-// }
+ // wp_enqueue_style('style', plugin_dir_url(__FILE__) .'assets/css/style.css');
+//}
 
-// add_action('wp_enqueue_scripts', 'import_scripts_and_styles');
+ // add_action('wp_enqueue_scripts', 'import_scripts_and_styles');
 
 add_action( 'admin_menu','egosms' );
 
@@ -121,13 +121,14 @@ function send_message() {
 
     $order_data  = $order->get_data();
 
-    $result = $wpdb->get_row ( "SELECT username, password, sender_id FROM $user_table " ); 
+    $result = $wpdb->get_row ( "SELECT username, password, sender_id, message FROM $user_table " ); 
     // Required parameters for EgoSMS
     $username = $result->username;
     $password = $result->password;
     $sender = $result->sender_id;
+    $my_message = $result->message;
     $number = $order_data['billing']['phone'];
-    $message = 'Your order No. '.$order_id.' has been received. Thank you';
+    $message = 'Your order No. is '.$order_id.'. '.$my_message;
 
     require_once plugin_dir_path( __FILE__ ) . 'includes/API.php';
  
