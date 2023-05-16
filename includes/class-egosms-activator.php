@@ -38,12 +38,12 @@ class Egosms_Activator {
 		//Check if tables exist. In case it's false we create it
 		// Create a table for storing egosms user
 		if($wpdb->get_var("SHOW TABLES LIKE '$egouser_tb'") !== $egouser_tb){
-			$msql = "CREATE TABLE $egouser_tb(
-				id mediumint unsigned not null primary key auto_increment,
-				username varchar(20),
-				password varchar(150),
-				sender_id varchar(50),
-				message varchar(150)
+			$msql = "CREATE TABLE IF NOT EXISTS $egouser_tb(
+				id mediumint unsigned NOT NULL PRIMARY KEY auto_increment,
+				username VARCHAR(20),
+				password VARCHAR(150),
+				sender_id VARCHAR(50),
+				message VARCHAR(150)
 			)";
 
 			require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
@@ -52,11 +52,12 @@ class Egosms_Activator {
 
 		// Create a table for storing messages
 		if($wpdb->get_var("SHOW TABLES LIKE '$message_tb'") !== $message_tb){
-			$msql = "CREATE TABLE $message_tb(
-				id mediumint unsigned not null primary key auto_increment,
-				recipient varchar(20),
+			$msql = "CREATE TABLE IF NOT EXISTS $message_tb(
+				id mediumint unsigned NOT NULL PRIMARY KEY auto_increment,
+				send_date DATETIME NULL DEFAULT CURRENT_TIMESTAMP,
+				recipient VARCHAR(20),
 				message text,
-				message_status varchar(1)
+				message_status VARCHAR(1)
 			)";
 
 			require_once(ABSPATH . 'wp-admin/includes/upgrade.php');

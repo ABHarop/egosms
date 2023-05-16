@@ -29,3 +29,20 @@
 if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	exit;
 }
+
+$option_name = 'wporg_option';
+
+delete_option( $option_name );
+
+// for site options in Multisite
+delete_site_option( $option_name );
+
+// drop a custom database table
+global $wpdb;
+$egoTableArray = [
+	$wpdb->prefix . "egosms_user",
+	$wpdb->prefix . "egosms_messages",
+];
+foreach($egoTableArray as $table){
+	$wpdb->query("DROP TABLE IF EXISTS $table");
+}

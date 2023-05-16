@@ -85,9 +85,10 @@
         <table class="wp-list-table widefat striped">
             <thead>
             <tr>
-                <th width="25%" style="font-weight: 500">Recipient</th>
-                <th width="25%" style="font-weight: 500">Message</th>
-                <th width="25%" style="font-weight: 500">Status</th>
+                <th width="20%" style="font-weight: 500">Date/Time</th>
+                <th width="20%" style="font-weight: 500">Recipient</th>
+                <th width="20%" style="font-weight: 500">Message</th>
+                <th width="20%" style="font-weight: 500">Status</th>
             </tr>
             </thead>
             <tbody id="refreshDivContent">
@@ -96,9 +97,10 @@
                     $message_table = $wpdb->prefix . "egosms_messages";
                     $result = $wpdb->get_results("SELECT * FROM $message_table ORDER BY id DESC");
                     foreach ($result as $print) {
-                        $status = $print->message_status == 1 ? 'Sent' : 'Failed';
+                        $status = $print->message_status == 1 ? '<span style="color:green"><i>Sent</i></span>' : '<span style="color:red"><i>Failed</i></span>';
                         echo "
                         <tr>
+                            <td width='25%'>$print->send_date</td>
                             <td width='25%'>$print->recipient</td>
                             <td width='25%'>$print->message</td>
                             <td width='25%'>$status</td>

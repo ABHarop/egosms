@@ -58,8 +58,14 @@ function deactivate_egosms() {
 	Egosms_Deactivator::deactivate();
 }
 
+function uninstall_egosms() {
+	require_once plugin_dir_path( __FILE__ ) . 'uninstall.php';
+}
+
+
 register_activation_hook( __FILE__, 'activate_egosms' );
 register_deactivation_hook( __FILE__, 'deactivate_egosms' );
+register_uninstall_hook(__FILE__, 'uninstall_egosms');
 
 /**
  * The core plugin class that is used to define internationalization,
