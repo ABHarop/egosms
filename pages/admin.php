@@ -100,10 +100,10 @@
                         $status = $print->message_status == 1 ? '<span style="color:green"><i>Sent</i></span>' : '<span style="color:red"><i>Failed</i></span>';
                         echo "
                         <tr>
-                            <td width='25%'>$print->send_date</td>
-                            <td width='25%'>$print->recipient</td>
-                            <td width='25%'>$print->message</td>
-                            <td width='25%'>$status</td>
+                            <td width='20%'>$print->send_date</td>
+                            <td width='20%'>$print->recipient</td>
+                            <td width='20%'>$print->message</td>
+                            <td width='20%'>$status</td>
                         </tr>
                         ";
                     }
@@ -114,10 +114,7 @@
 </div>
 
 <script>
-    // js for refreshing table
-    setInterval(function() {
-        $('#refreshDivContent').load(location.href + ' #refreshDivContent');
-    }, 3000);
+          
     // JS for handling tab behaviour
     function openTab(evt, menuItem)
     {
@@ -136,7 +133,6 @@
         evt.currentTarget.className += " active";
     }
 
-    
     // Get the element with id="defaultOpen" and click on it
     document.getElementById("defaultOpen").click();
 
@@ -186,7 +182,6 @@
         ";
     }
     /*============== End section for entering user details into the database ====================*/
-
 
     /*============== Sending message to recipient ====================*/
     if (isset($_POST['sendmessage']))

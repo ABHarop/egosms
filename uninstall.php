@@ -34,10 +34,10 @@ $option_name = 'wporg_option';
 
 delete_option( $option_name );
 
-// for site options in Multisite
+// For site options in Multisite
 delete_site_option( $option_name );
 
-// drop a custom database table
+// Delete egosms tables
 global $wpdb;
 $egoTableArray = [
 	$wpdb->prefix . "egosms_user",

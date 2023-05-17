@@ -62,7 +62,6 @@ function uninstall_egosms() {
 	require_once plugin_dir_path( __FILE__ ) . 'uninstall.php';
 }
 
-
 register_activation_hook( __FILE__, 'activate_egosms' );
 register_deactivation_hook( __FILE__, 'deactivate_egosms' );
 register_uninstall_hook(__FILE__, 'uninstall_egosms');
@@ -84,20 +83,6 @@ function egosms(){
         PLUGIN_URL . '/assets/img/icon.png', 110,
     );
 }
-
-// importing external css
-// function import_scripts_and_styles() {
-    // To enqueue style.css
-    //wp_enqueue_style( 'style.css', get_stylesheet_directory_uri() . 'assets/css/style.css', array(), time(), false );
-   // wp_register_style( 'style.css', get_stylesheet_directory_uri() . 'assets/css/style.css');
-   // wp_enqueue_style( 'style.css');
-    // To enqueue custom-script.js
-  //  wp_enqueue_script( 'custom-js', get_stylesheet_directory_uri() . '/assets/js/custom-script.js', array(), "", true );
-
- // wp_enqueue_style('style', plugin_dir_url(__FILE__) .'assets/css/style.css');
-//}
-
- // add_action('wp_enqueue_scripts', 'import_scripts_and_styles');
 
 add_action( 'admin_menu','egosms' );
 
