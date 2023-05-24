@@ -107,18 +107,37 @@ function send_message() {
 
     }
 
-    $order = wc_get_order(get_last_order_id());
     $order_id = get_last_order_id();
 
-    $order_data  = $order->get_data();
+    // Function for handling phone numbers from different countries
+    function get_phone_number(){
+
+        $order = wc_get_order(get_last_order_id());
+        $order_data  = $order->get_data();
+        $country = $order_data['billing']['country'];
+        $phone_number = $order_data['billing']['phone'];
+
+        if($country == 'UG'){
+            if($phone_number[0] == '0'){
+                $sent_phone = substr_replace(substr($phone_number, 1), '256', 0, 0);
+            }else{
+                $sent_phone = $phone_number;
+            }
+        }else{
+            $sent_phone = $phone_number;
+        }
+
+        return $sent_phone;
+    }
 
     $result = $wpdb->get_row ( "SELECT username, password, sender_id, message FROM $user_table " ); 
+    
     // Required parameters for EgoSMS
     $username = $result->username;
     $password = $result->password;
     $sender = $result->sender_id;
     $my_message = $result->message;
-    $number = $order_data['billing']['phone'];
+    $number = get_phone_number();
     $message = 'Your order No. is '.$order_id.'. '.$my_message;
 
     require_once plugin_dir_path( __FILE__ ) . 'includes/API.php';

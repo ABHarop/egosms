@@ -189,10 +189,20 @@
         global $wpdb;
         $user_table = $wpdb->prefix . "egosms_user";
         $message_table = $wpdb->prefix . "egosms_messages";
+        
         // Required parameters for EgoSMS
-        $number = $_POST['recipient'];
+        $phone_number = $_POST['recipient'];
         $message = $_POST['message'];
-    
+
+        // If number starting with 0 is submitted, convert the first number to 256
+        if($phone_number[0] == '0'){
+            $sent_phone = substr_replace(substr($phone_number, 1), '256', 0, 0);
+        }else{
+            $sent_phone = $phone_number;
+        }
+
+        $number = $sent_phone;
+
         $result = $wpdb->get_row ( "SELECT username, password, sender_id FROM $user_table " ); 
 
         if($result){
