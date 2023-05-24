@@ -85,9 +85,10 @@
         <table class="wp-list-table widefat striped">
             <thead>
             <tr>
-                <th width="25%" style="font-weight: 500">Recipient</th>
-                <th width="25%" style="font-weight: 500">Message</th>
-                <th width="25%" style="font-weight: 500">Status</th>
+                <th width="20%" style="font-weight: 500">Date/Time</th>
+                <th width="20%" style="font-weight: 500">Recipient</th>
+                <th width="20%" style="font-weight: 500">Message</th>
+                <th width="20%" style="font-weight: 500">Status</th>
             </tr>
             </thead>
             <tbody id="refreshDivContent">
@@ -96,12 +97,13 @@
                     $message_table = $wpdb->prefix . "egosms_messages";
                     $result = $wpdb->get_results("SELECT * FROM $message_table ORDER BY id DESC");
                     foreach ($result as $print) {
-                        $status = $print->message_status == 1 ? 'Sent' : 'Failed';
+                        $status = $print->message_status == 1 ? '<span style="color:green"><i>Sent</i></span>' : '<span style="color:red"><i>Failed</i></span>';
                         echo "
                         <tr>
-                            <td width='25%'>$print->recipient</td>
-                            <td width='25%'>$print->message</td>
-                            <td width='25%'>$status</td>
+                            <td width='20%'>$print->send_date</td>
+                            <td width='20%'>$print->recipient</td>
+                            <td width='20%'>$print->message</td>
+                            <td width='20%'>$status</td>
                         </tr>
                         ";
                     }
@@ -112,10 +114,7 @@
 </div>
 
 <script>
-    // js for refreshing table
-    setInterval(function() {
-        $('#refreshDivContent').load(location.href + ' #refreshDivContent');
-    }, 3000);
+          
     // JS for handling tab behaviour
     function openTab(evt, menuItem)
     {
@@ -134,7 +133,6 @@
         evt.currentTarget.className += " active";
     }
 
-    
     // Get the element with id="defaultOpen" and click on it
     document.getElementById("defaultOpen").click();
 
@@ -185,17 +183,26 @@
     }
     /*============== End section for entering user details into the database ====================*/
 
-
     /*============== Sending message to recipient ====================*/
     if (isset($_POST['sendmessage']))
     {
         global $wpdb;
         $user_table = $wpdb->prefix . "egosms_user";
         $message_table = $wpdb->prefix . "egosms_messages";
+        
         // Required parameters for EgoSMS
-        $number = $_POST['recipient'];
+        $phone_number = $_POST['recipient'];
         $message = $_POST['message'];
-    
+
+        // If number starting with 0 is submitted, convert the first number to 256
+        if($phone_number[0] == '0'){
+            $sent_phone = substr_replace(substr($phone_number, 1), '256', 0, 0);
+        }else{
+            $sent_phone = $phone_number;
+        }
+
+        $number = $sent_phone;
+
         $result = $wpdb->get_row ( "SELECT username, password, sender_id FROM $user_table " ); 
 
         if($result){
